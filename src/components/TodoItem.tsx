@@ -28,11 +28,11 @@ export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
     address: TODO_LIST_ADDRESS,
     abi: TODO_LIST_ABI,
     functionName: "toggleTask",
+    onSuccess: () => onUpdate?.(),
   });
 
   const { isLoading: isToggleConfirming } = useWaitForTransaction({
     hash: toggleData?.hash,
-    onSuccess: () => onUpdate?.(),
   });
 
   // Delete task
@@ -44,19 +44,19 @@ export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
     address: TODO_LIST_ADDRESS,
     abi: TODO_LIST_ABI,
     functionName: "deleteTask",
+    onSuccess: () => onUpdate?.(),
   });
 
   const { isLoading: isDeleteConfirming } = useWaitForTransaction({
     hash: deleteData?.hash,
-    onSuccess: () => onUpdate?.(),
   });
 
   const handleToggle = () => {
-    toggleWrite?.({ args: [BigInt(index)] });
+    toggleWrite?.({ args: [index] });
   };
 
   const handleDelete = () => {
-    deleteWrite?.({ args: [BigInt(index)] });
+    deleteWrite?.({ args: [index] });
   };
 
   const isToggling = isTogglePending || isToggleConfirming;
