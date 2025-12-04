@@ -13,7 +13,6 @@ interface AddTaskFormProps {
 export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   const [content, setContent] = useState("");
 
-  // Gunakan useContractWrite menggantikan useWriteContract
   const {
     data,
     isLoading: isPending,
@@ -25,26 +24,23 @@ export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
     functionName: "createTask",
   });
 
-  // Gunakan useWaitForTransaction menggantikan useWaitForTransactionReceipt
   const { isLoading: isConfirming, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
+    onSuccess: () => onTaskAdded?.(),
   });
 
   useEffect(() => {
-    if (isSuccess && content) {
+    if (isSuccess) {
       setContent("");
       reset();
-      onTaskAdded?.();
     }
-  }, [isSuccess, content, reset, onTaskAdded]);
+  }, [isSuccess, reset]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() || !writeContract) return;
 
-    writeContract({
-      args: [content.trim()],
-    });
+    writeContract({ args: [content.trim()] });
   };
 
   const isLoading = isPending || isConfirming;
