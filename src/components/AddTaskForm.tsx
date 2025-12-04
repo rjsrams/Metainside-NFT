@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
 import { TODO_LIST_ADDRESS, TODO_LIST_ABI } from "@/lib/contracts";
 import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
