@@ -13,33 +13,28 @@ interface AddTaskFormProps {
 export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   const [content, setContent] = useState("");
 
-  const {
-    data,
-    isLoading: isPending,
-    write: writeContract,
-    reset,
-  } = useContractWrite({
-    address: TODO_LIST_ADDRESS,
-    abi: TODO_LIST_ABI,
-    functionName: "createTask",
-  });
+  const { data, write: writeContract, isLoading: isPending, reset } =
+    useContractWrite({
+      address: TODO_LIST_ADDRESS,
+      abi: TODO_LIST_ABI,
+      functionName: "createTask",
+    });
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
-    onSuccess: () => onTaskAdded?.(),
   });
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && content) {
       setContent("");
       reset();
+      onTaskAdded?.();
     }
-  }, [isSuccess, reset]);
+  }, [isSuccess, content, reset, onTaskAdded]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() || !writeContract) return;
-
     writeContract({ args: [content.trim()] });
   };
 
@@ -56,10 +51,7 @@ export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
             placeholder="What needs to be done?"
             disabled={isLoading}
             maxLength={500}
-            className="w-full px-4 py-3 bg-secondary/30 border border-border/50 rounded-xl 
-                     focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50
-                     placeholder:text-muted-foreground/50 transition-all duration-200
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 bg-secondary/30 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 placeholder:text-muted-foreground/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           />
           {content.length > 0 && (
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
@@ -70,15 +62,9 @@ export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
         <Button
           type="submit"
           disabled={isLoading || !content.trim()}
-          className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 
-                   shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200
-                   disabled:shadow-none"
+          className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200 disabled:shadow-none"
         >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           <span className="hidden sm:inline">Add Task</span>
         </Button>
       </div>
