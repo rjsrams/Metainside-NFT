@@ -13,14 +13,12 @@ interface AddTaskFormProps {
 export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   const [content, setContent] = useState("");
 
-  // Gunakan useContractWrite sesuai versi wagmi terbaru
   const { data, write, isLoading: isWriting, reset, error } = useContractWrite({
     address: TODO_LIST_ADDRESS,
     abi: TODO_LIST_ABI,
     functionName: "createTask",
   });
 
-  // Gunakan useWaitForTransaction untuk memantau status transaksi
   const { isLoading: isConfirming, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
   });
