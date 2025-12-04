@@ -1,6 +1,6 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
 import { TODO_LIST_ADDRESS, TODO_LIST_ABI } from "@/lib/contracts";
 import { Check, Circle, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,42 +19,44 @@ interface TodoItemProps {
 }
 
 export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
-  const { 
-    writeContract: toggleWrite, 
-    data: toggleHash, 
-    isPending: isTogglePending 
-  } = useWriteContract();
-  
-  const { 
-    writeContract: deleteWrite, 
-    data: deleteHash, 
-    isPending: isDeletePending 
-  } = useWriteContract();
-
-  const { isLoading: isToggleConfirming } = useWaitForTransactionReceipt({
-    hash: toggleHash,
+  // Toggle task
+  const {
+    data: toggleData,
+    write: toggleWrite,
+    isLoading: isTogglePending,
+  } = useContractWrite({
+    address: TODO_LIST_ADDRESS,
+    abi: TODO_LIST_ABI,
+    functionName: "toggleTask",
   });
 
-  const { isLoading: isDeleteConfirming } = useWaitForTransactionReceipt({
-    hash: deleteHash,
+  const { isLoading: isToggleConfirming } = useWaitForTransaction({
+    hash: toggleData?.hash,
+    onSuccess: () => onUpdate?.(),
+  });
+
+  // Delete task
+  const {
+    data: deleteData,
+    write: deleteWrite,
+    isLoading: isDeletePending,
+  } = useContractWrite({
+    address: TODO_LIST_ADDRESS,
+    abi: TODO_LIST_ABI,
+    functionName: "deleteTask",
+  });
+
+  const { isLoading: isDeleteConfirming } = useWaitForTransaction({
+    hash: deleteData?.hash,
+    onSuccess: () => onUpdate?.(),
   });
 
   const handleToggle = () => {
-    toggleWrite({
-      address: TODO_LIST_ADDRESS,
-      abi: TODO_LIST_ABI,
-      functionName: "toggleTask",
-      args: [BigInt(index)],
-    });
+    toggleWrite?.({ args: [BigInt(index)] });
   };
 
   const handleDelete = () => {
-    deleteWrite({
-      address: TODO_LIST_ADDRESS,
-      abi: TODO_LIST_ABI,
-      functionName: "deleteTask",
-      args: [BigInt(index)],
-    });
+    deleteWrite?.({ args: [BigInt(index)] });
   };
 
   const isToggling = isTogglePending || isToggleConfirming;
