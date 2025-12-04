@@ -19,7 +19,6 @@ interface TodoItemProps {
 }
 
 export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
-  // Toggle task
   const {
     data: toggleData,
     write: toggleWrite,
@@ -28,14 +27,13 @@ export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
     address: TODO_LIST_ADDRESS,
     abi: TODO_LIST_ABI,
     functionName: "toggleTask",
-    onSuccess: () => onUpdate?.(),
   });
 
   const { isLoading: isToggleConfirming } = useWaitForTransaction({
     hash: toggleData?.hash,
+    onSuccess: () => onUpdate?.(),
   });
 
-  // Delete task
   const {
     data: deleteData,
     write: deleteWrite,
@@ -44,34 +42,27 @@ export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
     address: TODO_LIST_ADDRESS,
     abi: TODO_LIST_ABI,
     functionName: "deleteTask",
-    onSuccess: () => onUpdate?.(),
   });
 
   const { isLoading: isDeleteConfirming } = useWaitForTransaction({
     hash: deleteData?.hash,
+    onSuccess: () => onUpdate?.(),
   });
 
-  const handleToggle = () => {
-    toggleWrite?.({ args: [index] });
-  };
-
-  const handleDelete = () => {
-    deleteWrite?.({ args: [index] });
-  };
+  const handleToggle = () => toggleWrite?.({ args: [BigInt(index)] });
+  const handleDelete = () => deleteWrite?.({ args: [BigInt(index)] });
 
   const isToggling = isTogglePending || isToggleConfirming;
   const isDeleting = isDeletePending || isDeleteConfirming;
   const isLoading = isToggling || isDeleting;
 
-  const formatDate = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) * 1000);
-    return date.toLocaleDateString("en-US", {
+  const formatDate = (timestamp: bigint) =>
+    new Date(Number(timestamp) * 1000).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
   return (
     <div
@@ -118,8 +109,7 @@ export function TodoItem({ task, index, onUpdate }: TodoItemProps) {
       <button
         onClick={handleDelete}
         disabled={isLoading}
-        className="flex-shrink-0 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 
-                 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
+        className="flex-shrink-0 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
       >
         {isDeleting ? (
           <Loader2 className="h-4 w-4 animate-spin" />
