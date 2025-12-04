@@ -13,12 +13,19 @@ interface AddTaskFormProps {
 export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   const [content, setContent] = useState("");
 
-  const { data, write, isLoading: isWriting, reset, error } = useContractWrite({
+  // Gunakan useContractWrite menggantikan useWriteContract
+  const {
+    data,
+    isLoading: isPending,
+    write: writeContract,
+    reset,
+  } = useContractWrite({
     address: TODO_LIST_ADDRESS,
     abi: TODO_LIST_ABI,
     functionName: "createTask",
   });
 
+  // Gunakan useWaitForTransaction menggantikan useWaitForTransactionReceipt
   const { isLoading: isConfirming, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
   });
@@ -26,21 +33,21 @@ export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
   useEffect(() => {
     if (isSuccess && content) {
       setContent("");
-      reset?.();
+      reset();
       onTaskAdded?.();
     }
   }, [isSuccess, content, reset, onTaskAdded]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || !writeContract) return;
 
-    write?.({
+    writeContract({
       args: [content.trim()],
     });
   };
 
-  const isLoading = isWriting || isConfirming;
+  const isLoading = isPending || isConfirming;
 
   return (
     <form onSubmit={handleSubmit} className="relative">
@@ -79,17 +86,10 @@ export function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
           <span className="hidden sm:inline">Add Task</span>
         </Button>
       </div>
-
       {isConfirming && (
         <p className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
           <Loader2 className="h-3 w-3 animate-spin" />
           Confirming transaction...
-        </p>
-      )}
-
-      {error && (
-        <p className="mt-2 text-sm text-red-500">
-          {error.message || "Transaction failed"}
         </p>
       )}
     </form>
